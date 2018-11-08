@@ -1,0 +1,50 @@
+pragma solidity ^0.4.25;
+import "./Strings.sol";
+
+contract Person{
+    using Strings for string;
+    
+    mapping (string => string) infos;
+    mapping (string => bool) authority;
+    mapping (string => bool) keyExists;
+    string[] keys;
+    address owner;
+    constructor (){
+        owner = msg.sender;
+    }
+    modifier ownerOnly{
+        require(owner == msg.sender);
+        _;
+    }
+    function addInfo(string _key, string _val, bool _readable) ownerOnly {
+        infos[_key] = _val;
+        authority[_key] = _readable;
+        if(!keyExists[_key]){
+            keys.push(_key);
+            keyExists[_key] = true;
+        }
+    }
+    function getAddress () returns (address){
+        return owner;
+    }
+    function getAddressString () returns (string){
+        return Strings.valueOf(owner);
+    }
+    function getInfo() returns (string) {
+        string memory info = "{\"address\":\"";
+        
+        info.concat(Strings.valueOf(owner));
+        info.concat("\"");
+        for(uint i = 0; i < keys.length; i++){
+            if(authority[keys[i]]){
+                info.concat(",\"");
+                info.concat(keys[i]);
+                info.concat("\":\"");
+                info.concat(infos[keys[i]]);
+                info.concat("\"");
+            }
+        }
+        info.concat("}");
+        return info;
+    }
+}

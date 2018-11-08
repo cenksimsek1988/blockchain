@@ -1,0 +1,58 @@
+pragma solidity ^0.4.25;
+import "./Person.sol";
+
+
+contract Election {
+    mapping (address => int) private points;
+    mapping (address => mapping (address => int)) votes;
+    address[] candidates;
+    mapping (address => int) rights;
+    mapping (address => Person) persons;
+    mapping (address => bool) personExist;
+    address issuer;
+    
+    constructor () {
+        issuer = msg.sender;
+    }
+    
+    modifier issuerOnly{
+        require(issuer == msg.sender);
+        _;
+    }
+    
+    modifier personOnly{
+        require(personExist[msg.sender]);
+        _;
+    }
+    
+    modifier voterOnly{
+        require(rights[msg.sender] != 0);
+        _;
+    }
+    
+    function vote(address _to, int _point) voterOnly {
+        if(votes[msg.sender][_to] != 0){
+            points[_to] -= votes[msg.sender][_to];
+        }
+        int right = rights[msg.sender];
+        assert(right!=0);
+        votes[msg.sender][_to] = _point;
+        points[_to] += _point;
+        return;
+    }
+    
+    function countMyVote() returns (int){
+        return points[msg.sender];
+    }
+    function applyAsCandidate() personOnly {
+        for(uint i = 0; i < candidates.length; i++) {
+            if(candidates[i]==msg.sender){
+                return;
+            }
+        }
+        candidates.push(msg.sender);
+    }
+    function listCandidates() returns (address[]) {
+        return candidates;
+    }
+}

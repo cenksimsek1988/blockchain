@@ -1,0 +1,11 @@
+pragma solidity ^0.4.25;
+import "./Election.sol";
+
+
+contract Elections {
+    mapping (address => mapping (uint => Election)) elections;
+    
+    function addElection(Election _el, address _addr, uint _ver){
+        elections[_addr][_ver] = _el;
+    }
+}
